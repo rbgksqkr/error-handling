@@ -1,17 +1,17 @@
-let dataCache: unknown = null;
-let promiseCache: Promise<void> | null = null;
+const dataCache: Record<string, unknown> = {};
+const promiseCache: Record<string, Promise<void>> = {};
 
 type Resolve = (value: void | PromiseLike<void>) => void;
 
 const fetchData = <T>(url: string): T => {
-  if (dataCache) return dataCache as T;
+  if (dataCache[url]) return dataCache[url] as T;
 
-  if (!promiseCache) {
-    promiseCache = new Promise((resolve) => {
+  if (!promiseCache[url]) {
+    promiseCache[url] = new Promise((resolve) => {
       const getData = async (resolve: Resolve) => {
         const res = await fetch(url);
         const result = await res.json();
-        dataCache = result;
+        dataCache[url] = result;
         resolve();
       };
 
@@ -19,7 +19,7 @@ const fetchData = <T>(url: string): T => {
     });
   }
 
-  throw promiseCache;
+  throw promiseCache[url];
 };
 
 export default fetchData;
