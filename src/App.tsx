@@ -1,13 +1,9 @@
 import "./App.css";
-import Task from "./components/Task";
-import CustomSuspense from "./CustomSuspense";
+
+import { User } from "./components/User";
 
 const App = () => {
-  return (
-    <CustomSuspense fallback={<div>Loading...</div>}>
-      <Task />
-    </CustomSuspense>
-  );
+  return <User id={1} />;
 };
 
 export default App;
