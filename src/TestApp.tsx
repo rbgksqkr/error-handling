@@ -1,8 +1,17 @@
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import "./App.css";
 
+// Cache to store user data or promise
+const cache: Record<number, { data?: UserInfo; promise?: Promise<void> }> = {};
+
 const TestApp = () => {
-  return <Component id={1} />;
+  console.log("TestApp render");
+
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <UserInfo id={1} />
+    </Suspense>
+  );
 };
 
 export default TestApp;
@@ -21,12 +30,11 @@ interface UserInfo {
   email: string;
 }
 
-export const Component = ({ id }: { id: number }) => {
-  const { data, isLoading, error } = useUserInfo(id);
+export const UserInfo = ({ id }: { id: number }) => {
+  console.log("UserInfo render");
+  const data = useUserInfo(id);
 
-  if (isLoading) return <LoadingFallback />;
-
-  if (error) return <ErrorFallback error={error} />;
+  //   if (error) return <ErrorFallback error={error} />;
 
   return (
     <div>
@@ -36,37 +44,57 @@ export const Component = ({ id }: { id: number }) => {
   );
 };
 
-const useUserInfo = (id: number) => {
-  const [data, setData] = useState<UserInfo>();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+const useUserInfo = (id: number): UserInfo => {
+  if (!cache[id]) {
+    const promise = getUser(id).then((data) => {
+      console.log("resolve promise");
+      cache[id] = { data };
+    });
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        setIsLoading(true);
-        const user = await getUser(id);
+    console.log("throw promise");
+    cache[id] = { promise };
+    throw promise;
+  }
 
-        if (!ignore) {
-          setData(user);
-        }
+  if (cache[id].promise) {
+    throw cache[id].promise;
+  }
 
-        setIsLoading(false);
-      } catch (err) {
-        const error = err as Error;
-        setError(error.message);
-      }
-    };
-
-    let ignore = false;
-    fetchUser();
-    return () => {
-      ignore = true;
-    };
-  }, [id]);
-
-  return { data, isLoading, error };
+  console.log("return cache data", cache[id].data!);
+  return cache[id].data!;
 };
+
+// const useUserInfo = (id: number) => {
+//   const [data, setData] = useState<UserInfo>();
+//   const [isLoading, setIsLoading] = useState(false);
+//   const [error, setError] = useState("");
+
+//   useEffect(() => {
+//     const fetchUser = async () => {
+//       try {
+//         setIsLoading(true);
+//         const user = await getUser(id);
+
+//         if (!ignore) {
+//           setData(user);
+//         }
+
+//         setIsLoading(false);
+//       } catch (err) {
+//         const error = err as Error;
+//         setError(error.message);
+//       }
+//     };
+
+//     let ignore = false;
+//     fetchUser();
+//     return () => {
+//       ignore = true;
+//     };
+//   }, [id]);
+
+//   return { data, isLoading, error };
+// };
 
 const getUser = async (id: number) => {
   const res = await fetch(`https://jsonplaceholder.typicode.com/users/${id}`);
