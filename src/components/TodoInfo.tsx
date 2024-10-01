@@ -1,9 +1,7 @@
-import { useTodoInfo } from "../hooks/useTodoInfo";
+import { Todo } from "../types";
 
-const TodoInfo = () => {
+const TodoInfo = ({ todo }: { todo: Todo | null }) => {
   console.log("TodoInfo render");
-
-  const { data: todo } = useTodoInfo(2);
 
   if (!todo) {
     return <div>TodoInfo Loading...</div>;
