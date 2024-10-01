@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import "./App.css";
 import { UserInfo } from "./components/UserInfo";
 
@@ -7,7 +8,11 @@ import { UserInfo } from "./components/UserInfo";
 const TestApp = () => {
   console.log("TestApp render");
 
-  return <UserInfo id={1} />;
+  return (
+    <Suspense fallback={<div>UserInfo loading...</div>}>
+      <UserInfo id={1} />
+    </Suspense>
+  );
 };
 
 export default TestApp;
