@@ -1,17 +1,25 @@
-import { Suspense } from "react";
 import "./App.css";
-import { UserInfo } from "./components/UserInfo";
+import TodoInfo from "./components/TodoInfo";
+import { useUserInfo } from "./hooks/useUserInfo";
 
-// Cache to store user data or promise
-// const cache: Record<number, { data?: UserInfo; promise?: Promise<void> }> = {};
+// const fetchUserAndPost = async (userId: number, todoId: number) => {
+//   const [user, todo] = await Promise.all([getUser(userId), getTodo(todoId)]);
+//   return { user, todo };
+// };
+
+// const promise = ({ userId, todoId }: { userId: number; todoId: number }) =>
+//   fetchUserAndPost(userId, todoId);
 
 const TestApp = () => {
-  console.log("TestApp render");
+  const { data: user } = useUserInfo(1);
+
+  if (!user) return <div>data loading...</div>;
 
   return (
-    <Suspense fallback={<div>UserInfo loading...</div>}>
-      <UserInfo id={1} />
-    </Suspense>
+    <>
+      <h1>{user.name}</h1>
+      <TodoInfo />
+    </>
   );
 };
 
